@@ -43,15 +43,28 @@ def get_historical_data(trader: Trader, time_back: timedelta, resolution: str):
     return price_data, volume_data
 
 
-def get_sma(price_data: List[float]) -> List[float]:
+def get_sma(price_data: List[float], num:int=8) -> List[float]:
     """Simple Moving Average
 
     """
+    result = []
+    for i in range(0, len(price_data)):
+        if i < num:
+            if i == 0:
+                current_avg = price_data[0]
+            else:
+                subset = price_data[0:i+1]
+                current_avg = round(sum(subset) / len(subset), 7)
+        else:
+            subset = price_data[i-num:i+1]
+            current_avg = round(sum(subset) / len(subset), 7)
 
-    result = price_data[:]
+        result.append(current_avg)
+
+    return result
 
 
-def get_ema(price_data: List[float]) -> List[float]:
+def get_ema(price_data: List[float], num:int=8) -> List[float]:
     """Expontential Moving Average
 
     """
@@ -59,7 +72,35 @@ def get_ema(price_data: List[float]) -> List[float]:
     pass
 
 
-def get_momentum(price_data: List[float]) -> List[float]:
+def get_wma(price_data: List[float], num:int=8) -> List[float]:
+    """Weighted Moving Average
+
+    """
+
+    result = []
+    weights = [i for i in range(1, num+1)]
+    
+    for i in range(0, len(price_data)):
+        if i <= num:
+            if i == 0:
+                current_avg = price_data[0]
+            else:
+                subset = price_data[0:i+1]
+                short_weights = [i for i in range(1, len(subset)+1)]
+                short_weighted_prices = [subset[j] * short_weights[j] for j in range(0, len(subset))]
+                current_avg = round(sum(short_weighted_prices) / sum(short_weights), 7)
+
+        else:
+            subset = price_data[i-num:i]
+            weighted_prices = [subset[j] * weights[j] for j in range(0, len(subset))]
+            current_avg = round(sum(weighted_prices) / sum(weights), 7)
+
+        result.append(current_avg)
+
+    return result
+
+
+def get_momentum(price_data: List[float], num:int=8) -> List[float]:
     """
 
     """
