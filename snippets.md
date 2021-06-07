@@ -25,19 +25,12 @@
 
 ## Listen for transactions and print them as they occur (stream)
 
-This could be used for handling output and database logging of transactions made by bot
-
     from stellar_sdk import Server, Keypair
 
     server = Server(horizon_url="https://horizon.stellar.org")
     keypair = Keypair.from_secret('my_secret_key')
     public_key = keypair.public_key
     last_cursor = 'now'  # or load where you left off
-
-
-    # Get all transactions from account - for past transactions, not for occurring ones
-    #transactions = server.transactions().for_account(account_id=public_key).call()
-    #print(transactions)
 
 
     def tx_handler(tx_response):
@@ -78,6 +71,8 @@ This could be used for handling output and database logging of transactions made
 
 ## Trade XLM/USDC
 
+TODO: This is kind of messy; rewrite it so it's cleaner
+
     from stellar_sdk import Keypair, Server, TransactionBuilder, Network, Asset
 
     server = Server(horizon_url="https://horizon.stellar.org")
@@ -115,7 +110,7 @@ This could be used for handling output and database logging of transactions made
     #tradeXLMtoUSDC('2', '0.65')
     #tradeUSDCtoXLM('1.337', '1.51')
 
-## Getting price info
+## Getting current price info
 
     import requests
 
@@ -128,39 +123,45 @@ This could be used for handling output and database logging of transactions made
     price = round(1/data['close'], 4)
     print('1 XLM = ' + str(price) + ' CENTUS')
 
-## Get all account balances (request)
+## Get account balances with requests
 
     import requests
-    from time import sleep
 
-    def get_balance(account):
-        r = requests.get(base_url + '/accounts/' + accounts[account]['address'])
-        if r.status_code == 200:
-            balances = r.json()
-            balances = balances.get('balances', [])
-            for b in balances:
-                asset = b.get('asset_type')
-                if asset == 'native':
-                    print('{} XLM'.format(b.get('balance')))
-                else:
-                    print('{} {} - issuer: {}'.format(b.get('balance'), b.get('asset_code'), b.get('asset_issuer')))
-        else:
-            print('Account not found')
+    my_public_key = 'my_public_key'
 
-## Alternative get account balances (sdk)
 
-    from stellar_base import Address
+    def get_balance(server: Server, public_key: str, asset_code: str) -> float:
+        r = requests.get('https://horizon.stellar.org/accounts/' + public_key)
+        balances = r.json()['balances']
+        for bal in balances:
+            if bal['asset_type'] == 'native':
+                if asset_code == 'XLM':
+                    return float(bal['balance'])
 
-    address = Address(address=pub_key, secret=None, network='public')
+            else:
+                if bal['asset_code'] == asset_code:
+                    return float(bal['balances'])
 
-    address.get()
+## Getting account balances with stellar_sdk
 
-    for asset in address.balances:
-        if asset['asset_type'] == 'native':
-            print('XLM: ' + asset['balance'])
+    from stellar_sdk import Server
 
-        else:
-            print(asset['asset_code'] + ': ' + asset['balance'])
+    server = Server('https://horizon.stellar.org')
+    my_public_key = 'my_public_key'
+
+
+    def get_balance(server: Server, public_key: str, asset_code: str) -> float:
+        account_call = server.accounts().account_id(public_key)
+        balances = account_call.call()['balances']
+
+        for bal in balances:
+            if bal['asset_type'] == 'native':
+                if asset_code == 'XLM':
+                    return float(bal['balance'])
+
+            else:
+                if bal['asset_code'] == asset_code:
+                    return float(bal['balance'])
 
 ## Get historical price data for SDEX pair
 
@@ -174,7 +175,7 @@ This could be used for handling output and database logging of transactions made
 
     period = 3600000
     end = datetime.now()
-    endTimestamp = round(end.timestamp()*1000)
+    endTimestamp = round(end.timestamp()*1000) # convert seconds to milliseconds
     start = datetime(end.year, end.month, end.day-4, end.hour, end.minute, end.second)
     startTimestamp = round(start.timestamp()*1000)
 

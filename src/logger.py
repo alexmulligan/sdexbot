@@ -21,7 +21,7 @@ class Logger:
 
     _counter = 0
 
-    def __init__(self, type='all', log_id=None, file_prefix='sdexbot_log-'):
+    def __init__(self, type='db', log_id=None, file_prefix='sdexbot_log-'):
         if type == 'all':
             self.csv = True
             self.db = True
