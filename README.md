@@ -38,7 +38,7 @@ The project is structured like this -
 
   - logger.py - contains a Logger class which can be used to log trades; most useful as a handler when listening to a trading stream from your bot account
 
-  - data_utils.py - contains functions to do things like: get historical data, calculate regular averages and moving averages, calculate momentum, etc.
+  - data_utils.py - contains functions to do things like: get historical data, calculate moving averages, etc.
 
   - other
 

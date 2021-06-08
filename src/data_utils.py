@@ -14,6 +14,11 @@ RESOLUTION_ENUM = {
 }
 
 
+# TODO: Implement this; maybe make different functions for buy/sell? also, how should it handle which asset the depth amount is in?
+def best_offer(trader: Trader) -> None:
+    pass
+
+
 def get_historical_data(trader: Trader, time_back: timedelta, resolution: str):
     """This method returns a list of historical price data of a SDEX trading pair
 
@@ -44,9 +49,7 @@ def get_historical_data(trader: Trader, time_back: timedelta, resolution: str):
 
 
 def get_sma(price_data: List[float], num:int=8) -> List[float]:
-    """Simple Moving Average
-
-    """
+    """Simple Moving Average"""
     result = []
     for i in range(0, len(price_data)):
         if i < num:
@@ -64,18 +67,8 @@ def get_sma(price_data: List[float], num:int=8) -> List[float]:
     return result
 
 
-def get_ema(price_data: List[float], num:int=8) -> List[float]:
-    """Expontential Moving Average
-
-    """
-
-    pass
-
-
 def get_wma(price_data: List[float], num:int=8) -> List[float]:
-    """Weighted Moving Average
-
-    """
+    """Weighted Moving Average"""
 
     result = []
     weights = [i for i in range(1, num+1)]
@@ -98,11 +91,3 @@ def get_wma(price_data: List[float], num:int=8) -> List[float]:
         result.append(current_avg)
 
     return result
-
-
-def get_momentum(price_data: List[float], num:int=8) -> List[float]:
-    """
-
-    """
-
-    pass
