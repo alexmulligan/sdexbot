@@ -27,8 +27,10 @@ class Logger:
             self.db = True
         elif type == 'csv':
             self.csv = True
+            self.db = False
         elif type == 'db':
-            self.csv = True
+            self.db = True
+            self.csv = False
         else:
             raise Exception('Logger: Invalid type specified')
 

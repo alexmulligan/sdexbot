@@ -1,0 +1,35 @@
+{
+    "_links": {
+        "self": {
+            "href": ""
+        },
+        "base": {
+            "href": "https://horizon.stellar.org/accounts/GB6XCMC2KYQVCLHDX5U4OM4OPPL2QON32NR27GFRNCQ2W6PVNUL2TWRH"
+        },
+        "counter": {
+            "href": "https://horizon.stellar.org/accounts/GAEGY6GLR4HWDLUGC4HWB2HZ7CLQHPR2GRC33BX3B5MKJC2U7RCVM2LA"
+        },
+        "operation": {
+            "href": "https://horizon.stellar.org/operations/154524672678301697"
+        }
+    },
+    "id": "154524672678301697-0",
+    "paging_token": "154524672678301697-0",
+    "ledger_close_time": "2021-06-19T23:07:24Z",
+    "offer_id": "646390434",
+    "base_offer_id": "646390434",
+    "base_account": "GB6XCMC2KYQVCLHDX5U4OM4OPPL2QON32NR27GFRNCQ2W6PVNUL2TWRH",
+    "base_amount": "0.0999999",
+    "base_asset_type": "native",
+    "counter_offer_id": "4766210691105689601",
+    "counter_account": "GAEGY6GLR4HWDLUGC4HWB2HZ7CLQHPR2GRC33BX3B5MKJC2U7RCVM2LA",
+    "counter_amount": "0.0289771",
+    "counter_asset_type": "credit_alphanum4",
+    "counter_asset_code": "USDC",
+    "counter_asset_issuer": "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN",
+    "base_is_seller": true,
+    "price": {
+        "n": 1000,
+        "d": 3451
+    }
+}

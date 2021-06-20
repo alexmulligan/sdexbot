@@ -1,2 +1,2 @@
 from stellar_sdk import Server
-from ..logger import Logger
+from logger import Logger
