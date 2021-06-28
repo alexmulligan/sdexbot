@@ -2,6 +2,7 @@
 
 ## Keypair basics
 
+```python
     from stellar_sdk import Keypair
 
     keypair = Keypair.from_secret('my_secret_key')
@@ -10,9 +11,11 @@
 
     print(public_key)
     print(can_sign)
+```
 
 ## Get transactions from account
 
+```python
     from stellar_sdk import Server, Keypair
 
     server = Server(horizon_url="https://horizon.stellar.org")
@@ -22,6 +25,7 @@
     # get a list of transactions submitted by a particular account
     transactions = server.transactions().for_account(account_id=public_key).call()
     print(transactions)
+```
 
 ## Listen for transactions and print them as they occur (stream)
 
@@ -38,9 +42,11 @@
 
     for tx in server.transactions().for_account(public_key).cursor(last_cursor).stream():
         tx_handler(tx)
+```
 
 ## Send XLM for USDC (path payment; with memo)
 
+```python
     from stellar_sdk import Keypair, Server, TransactionBuilder, Network, Asset
 
     server = Server(horizon_url="https://horizon.stellar.org")
@@ -61,18 +67,22 @@
 
     transaction.sign(keypair)
     response = server.submit_transaction(transaction)
+```
 
 ## Resolve Federation Address
 
+```python
     from stellar_sdk.sep.federation import resolve_stellar_address
 
     record = resolve_stellar_address('alexmulligan*stellarterm.com', None, use_http=False)
     print("Public Address: " + record.account_id)
+```
 
 ## Trade XLM/USDC
 
 TODO: This is kind of messy; rewrite it so it's cleaner
 
+```python
     from stellar_sdk import Keypair, Server, TransactionBuilder, Network, Asset
 
     server = Server(horizon_url="https://horizon.stellar.org")
@@ -109,9 +119,11 @@ TODO: This is kind of messy; rewrite it so it's cleaner
 
     #tradeXLMtoUSDC('2', '0.65')
     #tradeUSDCtoXLM('1.337', '1.51')
+```
 
 ## Getting current price info
 
+```python
     import requests
 
     tickers = requests.get('https://ticker.stellar.org/markets.json').json()
@@ -125,6 +137,7 @@ TODO: This is kind of messy; rewrite it so it's cleaner
 
 ## Get account balances with requests
 
+```python
     import requests
 
     my_public_key = 'my_public_key'
@@ -144,6 +157,7 @@ TODO: This is kind of messy; rewrite it so it's cleaner
 
 ## Getting account balances with stellar_sdk
 
+```python
     from stellar_sdk import Server
 
     server = Server('https://horizon.stellar.org')
@@ -162,9 +176,11 @@ TODO: This is kind of messy; rewrite it so it's cleaner
             else:
                 if bal['asset_code'] == asset_code:
                     return float(bal['balance'])
+```
 
 ## Get historical price data for SDEX pair
 
+```python
     from stellar_sdk import Server, Network, Asset
     from datetime import datetime
 
@@ -190,3 +206,4 @@ TODO: This is kind of messy; rewrite it so it's cleaner
         curr = records.next()
 
     print(data)
+```
