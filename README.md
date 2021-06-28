@@ -17,7 +17,7 @@ If you are familiar with Python, you might be able to use this, but I am just si
 
 ### Dependencies:
 
-Python 3 (>=3.6 - I used 3.6.9)
+Python 3 (>=3.6 - I used 3.8.5)
 
 [stellar-sdk](https://pypi.org/project/stellar-sdk/)
 
@@ -38,9 +38,11 @@ The project is structured like this -
 
   - logger.py - contains a Logger class which can be used to log trades; most useful as a handler when listening to a trading stream from your bot account
 
-  - data_utils.py - contains functions to do things like: get historical data, calculate moving averages, etc.
+  - data_utils.py - contains functions to do things like: get best ask/bid, get historical data, calculate moving averages, etc.
 
-  - other
+  - listener.py - a file meant to be run as a program which listens to a Stellar account for trades, and then logs them
+
+  - listener_test.py - a file meant to be run as a program which makes trades using the trader class; meant for testing the listener.py program
 
 <br><br>
 Thanks for checking out my project! Hope you'll find it interesting or useful. Feel free to fork it or use it yourself or anything else.

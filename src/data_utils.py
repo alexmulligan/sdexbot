@@ -3,6 +3,7 @@ from trader import Trader
 from datetime import datetime, timedelta
 from typing import List, Dict
 from statistics import mean
+import requests
 
 RESOLUTION_ENUM = {
     '1MIN': 60000,
@@ -14,9 +15,79 @@ RESOLUTION_ENUM = {
 }
 
 
-# TODO: Implement this; maybe make different functions for buy/sell? also, how should it handle which asset the depth amount is in?
-def best_offer(trader: Trader) -> None:
-    pass
+def print_dict(d, indent=0):
+    for k in d.keys():
+        if type(d.get(k)) == dict:
+            print("{}{}:".format('\t'*indent, k))
+            print_dict(d.get(k), indent=indent+1)
+        else:
+            print("{}{}: {}".format('\t'*indent, k, d.get(k)))
+
+
+def get_orderbook_url(trader: Trader) -> str:
+    """todo"""
+    url = 'https://horizon.stellar.org/order_book?'
+    params = []
+    if trader.quote.is_native():
+        params.append('buying_asset_type=native')
+    else:
+        params.append(f'buying_asset_type={trader.quote.type}')
+        params.append(f'buying_asset_code={trader.quote.code}')
+        params.append(f'buying_asset_issuer={trader.quote.issuer}')
+
+    if trader.base.is_native():
+        params.append('selling_asset_type=native')
+    else:
+        params.append(f'selling_asset_type={trader.base.type}')
+        params.append(f'selling_asset_code={trader.base.code}')
+        params.append(f'selling_asset_issuer={trader.base.issuer}')
+
+    limit = 20
+    params.append(f'limit={limit}')
+
+    for i in range(0, len(params)):
+        if i == 0:
+            url += params[i]
+        else:
+            url += '&' + params[i]
+    
+    return url
+
+
+def get_orders(trader: Trader):
+    """todo"""
+    url = get_orderbook_url(trader)
+    res = requests.get(url)
+    data = res.json()
+    bids = data['bids']
+    asks = data['asks']
+    return bids, asks
+
+
+def find_bid(bids, t_depth: float):
+    """todo"""
+    price = 0.0
+    depth = 0.0
+    for b in bids:
+        price = float(b['price'])
+        depth += float(b['amount'])
+        if depth >= t_depth:
+            break
+    
+    return round(price - 0.000001, 7)
+
+
+def find_ask(asks, t_depth: float):
+    """todo"""
+    price = 0.0
+    depth = 0.0
+    for a in asks:
+        price = float(a['price'])
+        depth += float(a['amount'])
+        if depth >= t_depth:
+            break
+    
+    return round(price + 0.000001, 7)
 
 
 def get_historical_data(trader: Trader, time_back: timedelta, resolution: str):

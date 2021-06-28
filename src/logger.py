@@ -3,9 +3,6 @@ from os import listdir, path, mkdir
 import csv
 import sqlite3
 
-# TODO: Currently, the program will append to logs which already exist (from log_id), but the counter resets every time.
-#       I need to implement functionality that will resume the counter from what is already in the log files
-# TODO: Possibly implement rounding to the nearing integer (second) for timestamp?
 class Logger:
     """Data Format:
 
@@ -35,7 +32,10 @@ class Logger:
             raise Exception('Logger: Invalid type specified')
 
         if log_id == None:
-            self.log_id = randint(1000, 9999) # TODO: fix this so it has no chance of generating an already used id number
+            rand_id = randint(0, 100)
+            while file_prefix + str(rand_id) + '.db' in listdir() or file_prefix + str(rand_id) + '.csv' in listdir(): # keep generating new random id's if current id is already used
+                rand_id = randint(0, 100)
+            self.log_id = rand_id
         else:
             self.log_id = log_id
 
@@ -72,9 +72,56 @@ class Logger:
             con.close()
 
 
-    # TODO: implement this function; maybe have it just print out the data in a table format?
     def read_log(self):
-        pass
+        result = ''
+        if self.csv:
+            with open(self.csv_path, 'r') as f:
+                for row in f:
+                    current_line = '|'
+                    for item in row:
+                        current_line += f' {item} |'
+                    result += current_line + '\n' + '-'*len(current_line) + '\n'
+
+        elif self.db:
+            con = sqlite3.connect(self.db_path)
+            cur = con.cursor()
+            data = cur.execute("SELECT * FROM trades;").fetchall()
+            con.close()
+            
+            for row in data:
+                current_line = '|'
+                for item in row:
+                    current_line += f' {item} |'
+                result += current_line + '\n' + '-'*len(current_line) + '\n'
+
+        else:
+            return None
+        
+        return result
+
+
+    def set_last_id(self):
+        if self.csv:
+            with open(self.csv_path, 'r') as f:
+                rows = []
+                for line in f:
+                    rows.append(line)
+                last_id = rows[-1][0] # return first element (id) of last row
+
+        elif self.db:
+            con = sqlite3.connect(self.db_path)
+            cur = con.cursor()
+            ids = cur.execute("SELECT ID FROM trades;").fetchall()
+            con.close()
+            if len(ids) > 0:
+                last_id = int(ids[-1][0]) # result is [(1,), (2,), (3,)] so we get last element of List, and then get the first element of that tuple
+            else:
+                last_id = 0
+    
+        else:
+            last_id = 0
+
+        self._counter = last_id
 
     ############## Private Methods ###############
 

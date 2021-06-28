@@ -2,24 +2,9 @@ from stellar_sdk import Keypair, Asset, Server, Network, TransactionBuilder
 from datetime import datetime
 
 # TODO: implement methods to cancel trades (as long as they haven't been filled)
-#       - this would require trade functions to return the offer_id and some way to check when orders have been filled.
-#       - I could implement querying all open (unfilled) trades as well as checking a specific offer_id
+#       - to do this, I would probably need a function to query open offers and go from there to cancel them
 #
-# TODO: should any rounding on amount values and/or price be implemented? or should this be left to the program using the class
-# ANSWER: I'm pretty sure Stellar rounds their values to 7 decimals.  So I think I want everything to be rounded in this class
-#
-# TODO: idea to cover (most) of ^: integrate with the logging to return a unique trade id (locally generated)
-#       - this could be used to check if the order is filled, cancel if it is unfilled, and lookup the trade in the database/log
-#       - the Trader object would also have a lastTradeId attribute which is the trade id of the last trade placed
-#       - querying a trade by the trade id should also be able to provide amount, price, time, etc. either/both from stellar and the database/log
-#
-# TODO: instead of logging a trade as soon as the order is placed, log it when it is filled for a more accurate timestamp
-#       - this goes hand in hand with being able to check/listen for when orders are filled
-#
-# TODO: should an additional field with a link to the transaction on Horizon be logged?
-#
-# NOTE: I don't think most of these ^ suggested solutions are what I want to do anymore.  I do think that some type of order_id could be used to track/cancel orders,
-#       but what if an order is partially filled? And I want to keep logging completely separate. Like have a program listen to my bot account for filled trades
+# TODO: should an additional field with a link to the transaction on Horizon be logged? !!!IMPORTANT
 #
 class Trader:
     _YEAR = 31536000
@@ -77,20 +62,11 @@ class Trader:
         transaction = TransactionBuilder(
             source_account=self.account, network_passphrase=Network.PUBLIC_NETWORK_PASSPHRASE, base_fee=100
         ).append_manage_sell_offer_op(
-            self.base.code, self.base.issuer, self.quote.code, self.quote.issuer, str(round(amount_base, 7)), str(round(price_in_quote, 7))
+            self.base.code, self.base.issuer, self.quote.code, self.quote.issuer, str(round(amount_base, 7)), str(round(1/price_in_quote, 7))
         ).set_timeout(self._YEAR).build()
 
         transaction.sign(self.keypair)
         response = self.server.submit_transaction(transaction)
-
-        '''trade_data = {
-            'timestamp': round(datetime.now().timestamp()),
-            'action': 'SELL',
-            'symbol': self.base.code + '-' + self.base.issuer,
-            'volume': round(amount_base / price_in_quote, 7), # results in amount in quote
-            'currency': self.quote.code if self.quote.is_native() else self.quote.code + '-' + self.quote.issuer,
-            'price': price_in_quote
-        }''' # might still need to use this, so leaving it in
 
         # TODO: handle reponse - check for success, etc.
         return response
@@ -108,15 +84,6 @@ class Trader:
 
         transaction.sign(self.keypair)
         response = self.server.submit_transaction(transaction)
-
-        '''trade_data = {
-            'timestamp': round(datetime.now().timestamp()),
-            'action': 'BUY',
-            'symbol': self.base.code + '-' + self.base.issuer,
-            'volume': amount_quote,
-            'currency': self.quote.code if self.quote.is_native() else self.quote.code + '-' + self.quote.issuer,
-            'price': price_in_quote
-        }'''  # might still need to use this, so leaving it in
 
         # TODO: handle reponse - check for success, etc.
         return response
