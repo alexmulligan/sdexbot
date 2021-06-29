@@ -1,5 +1,4 @@
 from stellar_sdk import Keypair, Asset, Server, Network, TransactionBuilder
-from datetime import datetime
 
 # TODO: implement methods to cancel trades (as long as they haven't been filled)
 #       - to do this, I would probably need a function to query open offers and go from there to cancel them
@@ -63,7 +62,7 @@ class Trader:
             source_account=self.account, network_passphrase=Network.PUBLIC_NETWORK_PASSPHRASE, base_fee=100
         ).append_manage_sell_offer_op(
             self.base.code, self.base.issuer, self.quote.code, self.quote.issuer, str(round(amount_base, 7)), str(round(1/price_in_quote, 7))
-        ).set_timeout(self._YEAR).build()
+        ).set_timeout(30).build()
 
         transaction.sign(self.keypair)
         response = self.server.submit_transaction(transaction)
@@ -80,7 +79,7 @@ class Trader:
             source_account=self.account, network_passphrase=Network.PUBLIC_NETWORK_PASSPHRASE, base_fee=100
         ).append_manage_sell_offer_op(
             self.quote.code, self.quote.issuer, self.base.code, self.base.issuer, str(round(amount_quote, 7)), str(price_in_base)
-        ).set_timeout(self._YEAR).build()
+        ).set_timeout(30).build()
 
         transaction.sign(self.keypair)
         response = self.server.submit_transaction(transaction)

@@ -1,9 +1,10 @@
 from stellar_sdk import Server, Network, Asset
 from trader import Trader
 from datetime import datetime, timedelta
-from typing import List, Dict
+from typing import List, Dict, Union
 from statistics import mean
-import requests
+
+RESERVE = None
 
 RESOLUTION_ENUM = {
     '1MIN': 60000,
@@ -24,48 +25,46 @@ def print_dict(d, indent=0):
             print("{}{}: {}".format('\t'*indent, k, d.get(k)))
 
 
-def get_orderbook_url(trader: Trader) -> str:
-    """todo"""
-    url = 'https://horizon.stellar.org/order_book?'
-    params = []
-    if trader.quote.is_native():
-        params.append('buying_asset_type=native')
-    else:
-        params.append(f'buying_asset_type={trader.quote.type}')
-        params.append(f'buying_asset_code={trader.quote.code}')
-        params.append(f'buying_asset_issuer={trader.quote.issuer}')
+def find_amount(trader: Trader, asset: str, reserve: float=3) -> float:
+    if RESERVE != None and RESERVE > 0:
+        reserve = RESERVE
 
-    if trader.base.is_native():
-        params.append('selling_asset_type=native')
-    else:
-        params.append(f'selling_asset_type={trader.base.type}')
-        params.append(f'selling_asset_code={trader.base.code}')
-        params.append(f'selling_asset_issuer={trader.base.issuer}')
+    if asset.strip().lower() == 'quote':
+        amount = trader.get_quote_balance()
+        if trader.quote.is_native():
+            amount = amount - reserve
 
-    limit = 20
-    params.append(f'limit={limit}')
-
-    for i in range(0, len(params)):
-        if i == 0:
-            url += params[i]
-        else:
-            url += '&' + params[i]
+    elif asset.strip().lower() == 'base':
+        amount = trader.get_base_balance()
+        if trader.base.is_native():
+            amount = amount - reserve
     
-    return url
+    return round(amount, 7)
 
 
-def get_orders(trader: Trader):
-    """todo"""
-    url = get_orderbook_url(trader)
-    res = requests.get(url)
-    data = res.json()
+def get_orders(source: Union[Trader, dict]):
+    """Function to get current bids and asks from Horizon
+    
+    You can either pass a Trader instance, and it will pull the orderbook directly from the server instance,
+    or you can pass the orderbook data already.  This is implemented so you can call this function independently with a Trader
+    object, or you can stream the orderbook endpoint and pass the data from it directly
+
+    source: Trader or dict - either a Trader object to get orderbook from, or the orderbook data itself
+    """
+    if type(source) == Trader:
+        data = source.server.orderbook(source.base, source.quote).call()
+    elif type(source) == dict:
+        data = source
+    else:
+        return None
+    
     bids = data['bids']
     asks = data['asks']
     return bids, asks
 
 
 def find_bid(bids, t_depth: float):
-    """todo"""
+    """find best bid in the orderbook needed to fill an order of amount t_depth"""
     price = 0.0
     depth = 0.0
     for b in bids:
@@ -78,7 +77,7 @@ def find_bid(bids, t_depth: float):
 
 
 def find_ask(asks, t_depth: float):
-    """todo"""
+    """find best ask in the orderbook needed to fill an order of amount t_depth"""
     price = 0.0
     depth = 0.0
     for a in asks:
